@@ -31,6 +31,11 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+
+            // Koin
+            implementation(project.dependencies.platform("io.insert-koin:koin-bom:3.5.1"))
+            implementation("io.insert-koin:koin-core")
+            implementation("io.insert-koin:koin-android")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -45,6 +50,16 @@ kotlin {
             // Navigation PreCompose
             api(libs.precompose)
             api(libs.precompose.viewmodel) // For ViewModel integration
+
+            // Koin
+            implementation(project.dependencies.platform("io.insert-koin:koin-bom:3.5.1"))
+            implementation("io.insert-koin:koin-core")
+            implementation("io.insert-koin:koin-compose")
+            api("moe.tlaster:precompose-koin:1.6.0")
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }
@@ -87,5 +102,6 @@ android {
     buildFeatures{
         compose = true
     }
+    //task("testClasses")
 }
 
