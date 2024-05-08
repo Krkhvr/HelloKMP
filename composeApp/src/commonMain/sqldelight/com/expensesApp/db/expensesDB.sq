@@ -1,0 +1,33 @@
+CREATE TABLE ExpenseEntity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    amount REAL NOT NULL,
+    category TEXT NOT NULL,
+    description TEXT NOT NULL
+);
+
+INSERT INTO ExpenseEntity(amount, category, description)
+VALUES
+(70.0, "GROCERIES", "Weekly buy"),
+(10.3, "SNACKS", "Hommies"),
+(21000.0, "CAR", "Audi A1"),
+(120.0, "PARTY", "Weekly party"),
+(25.0, "HOUSE", "Cleaning"),
+(128.0, "OTHER", "Services");
+
+insert:
+INSERT INTO ExpenseEntity(amount, category, description)
+VALUES (?, ?, ?);
+
+update:
+UPDATE ExpenseEntity
+SET amount = ?,
+    category = ?,
+    description = ?
+WHERE id = ?;
+
+selectAll:
+SELECT * FROM ExpenseEntity;
+
+categories:
+SELECT category
+FROM ExpenseEntity;

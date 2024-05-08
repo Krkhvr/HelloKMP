@@ -1,6 +1,8 @@
 package com.krkhvr.kotlinproject
 
 import android.app.Application
+import com.expensesApp.db.AppDatabase
+import data.repository.DatabaseDriverFactory
 import di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -13,7 +15,9 @@ class MainApplication: Application() {
         startKoin {
             androidContext(this@MainApplication)
             androidLogger()
-            modules(appModule())
+            modules(appModule(
+                AppDatabase.invoke(DatabaseDriverFactory(this@MainApplication).createDriver())
+            ))
         }
     }
 }
