@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -60,6 +61,7 @@ import domain.model.ExpenseCategory
 import kotlinx.coroutines.launch
 import presentation.screens.expense.TitleTopBarType
 import presentation.ui.theme.getColorsTheme
+import utils.EXPENSE_DETAIL_SCREEN_SUCCESS_TEST_TAG
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -103,7 +105,7 @@ fun ExpenseDetailScreen(
             }
         }
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp).testTag(EXPENSE_DETAIL_SCREEN_SUCCESS_TEST_TAG)) {
             ExpenseAmount(
                 price = price,
                 onPriceChange = {

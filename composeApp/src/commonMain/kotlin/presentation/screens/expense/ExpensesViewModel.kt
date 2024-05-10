@@ -10,63 +10,78 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
-data class ExpensesUiState(
-    val expenses: List<Expense> = emptyList(),
-    var total: Double = 0.0
-)
+sealed class ExpensesUiState{
+    data object Loading: ExpensesUiState()
+    data class Success(val expenses: List<Expense>, val total: Double): ExpensesUiState()
+    data class Error(val message: String): ExpensesUiState()
+}
 
 class ExpensesViewModel(
     private val expenseRepository: ExpenseRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ExpensesUiState())
+    private val _uiState = MutableStateFlow<ExpensesUiState>(ExpensesUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    private var allExpenses : MutableList<Expense> = mutableListOf()
-
     init {
-        getAllExpenses()
+        getExpensesList()
     }
 
-    private fun updateExpenseList(){
+    private fun getExpensesList(){
         viewModelScope.launch {
-            allExpenses = expenseRepository.getAllExpenses().toMutableList()
-            updateState()
-        }
-    }
-
-    private fun getAllExpenses(){
-        expenseRepository.getAllExpenses()
-        updateExpenseList()
-    }
-
-    private fun updateState(){
-        viewModelScope.launch {
-            _uiState.update { state ->
-                state.copy(expenses = allExpenses, total = allExpenses.sumOf { it.amount })
+            try{
+                val expenses = expenseRepository.getAllExpenses()
+                _uiState.value = ExpensesUiState.Success(expenses, expenses.sumOf { it.amount })
+            }catch (e: Exception){
+                _uiState.value = ExpensesUiState.Error(e.message ?: "Error desconocido")
             }
         }
     }
 
+    private suspend fun updateExpenseList(){
+        try{
+            val expenses = expenseRepository.getAllExpenses()
+            _uiState.value = ExpensesUiState.Success(expenses, expenses.sumOf { it.amount })
+        }catch (e: Exception){
+            _uiState.value = ExpensesUiState.Error(e.message ?: "Error desconocido")
+        }
+    }
+
     fun addExpense(expense: Expense){
-        expenseRepository.addExpense(expense)
-        updateExpenseList()
+        viewModelScope.launch {
+            try {
+                expenseRepository.addExpense(expense)
+                updateExpenseList()
+            }catch (e: Exception){
+                _uiState.value = ExpensesUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
     }
 
     fun editExpense(expense: Expense){
-        expenseRepository.editExpense(expense)
-        updateExpenseList()
+        viewModelScope.launch {
+            try {
+                expenseRepository.editExpense(expense)
+                updateExpenseList()
+            }catch (e: Exception){
+                _uiState.value = ExpensesUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
     }
 
-    /*fun deleteExpense(expense: Expense){
+    fun deleteExpense(id: Long){
         viewModelScope.launch {
-            expenseRepository.deleteExpense(expense)
-            updateState()
+            try {
+                expenseRepository.deleteExpense(id)
+                updateExpenseList()
+            }catch (e: Exception){
+                _uiState.value = ExpensesUiState.Error(e.message ?: "Error desconocido")
+            }
         }
-    }*/
+    }
 
-    fun getExpenseById(id: Long): Expense{
-        return allExpenses.first{ it.id == id }
+    fun getExpenseById(id: Long): Expense?{
+        return (_uiState.value as? ExpensesUiState.Success)?.expenses?.firstOrNull{ it.id == id }
     }
 
     fun getCategories(): List<ExpenseCategory>{

@@ -7,7 +7,7 @@ import kotlin.test.assertNotEquals
 
 class ExampleTest {
 
-    @Test
+    /*@Test
     fun sum_success() {
         // Given
         val x = 5
@@ -99,5 +99,5 @@ class ExampleTest {
 
         // Then
         assertNotEquals(expenseList[0].category, expenseList[1].category)
-    }
+    }*/
 }

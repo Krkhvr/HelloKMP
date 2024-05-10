@@ -34,11 +34,11 @@ fun ExpensesItemPreviews() {
 @Composable
 fun ExpensesScreenPreviews() {
     ExpensesScreen(
-        uiState = ExpensesUiState(
+        uiState = ExpensesUiState.Success(
             expenses = ExpenseManager.fakeExpenseList,
             total= 1053.42
-        )
-    ) {
-
-    }
+        ),
+        onExpenseClick = {},
+        onDeleteExpense = {}
+    )
 }

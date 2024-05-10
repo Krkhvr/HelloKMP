@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import data.CrossConfigDevice
+import data.SessionCache
 import moe.tlaster.precompose.PreComposeApp
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.navigation.path
@@ -29,8 +31,10 @@ import presentation.ui.theme.getColorsTheme
 
 @Composable
 @Preview
-fun App() {
+fun App(configDevice: CrossConfigDevice? = null) {
+
     val colors = getColorsTheme()
+    SessionCache.configDevice = configDevice
 
     PreComposeApp {
         AppTheme {

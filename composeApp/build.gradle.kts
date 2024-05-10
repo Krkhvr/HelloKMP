@@ -1,10 +1,13 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     id("app.cash.sqldelight") version "2.0.2"
+    kotlin("plugin.serialization") version "1.9.24"
 }
 
 sqldelight {
@@ -20,6 +23,16 @@ kotlin {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "11"
+            }
+        }
+
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        instrumentedTestVariant {
+            sourceSetTree.set(KotlinSourceSetTree.test)
+
+            dependencies {
+                implementation("androidx.compose.ui:ui-test-junit4-android:1.5.4")
+                debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.4")
             }
         }
     }
@@ -40,6 +53,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+            implementation("com.google.accompanist:accompanist-systemuicontroller:0.31.3-beta")
 
             // Koin
             implementation(project.dependencies.platform("io.insert-koin:koin-bom:3.5.1"))
@@ -48,6 +62,12 @@ kotlin {
 
             // SQLDeLight
             implementation("app.cash.sqldelight:android-driver:2.0.2")
+
+            // Ktor
+            implementation(libs.ktor.client.okhttp)
+
+            // Coroutines
+            implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -68,16 +88,31 @@ kotlin {
             implementation("io.insert-koin:koin-core")
             implementation("io.insert-koin:koin-compose")
             api("moe.tlaster:precompose-koin:1.6.0")
+
+            // Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.serialization)
+            implementation(libs.ktor.content.negotiation)
+
+            // Coroutines
+            implementation(libs.kotlinx.coroutines.core)
         }
 
         iosMain.dependencies {
             // SQLDeLight
             implementation("app.cash.sqldelight:native-driver:2.0.2")
             implementation("co.touchlab:stately-common:2.0.5")
+
+            // Ktor
+            implementation(libs.ktor.client.darwin)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            //implementation(kotlin("test"))
+
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.uiTest)
         }
     }
 }
@@ -96,6 +131,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     packaging {
         resources {
@@ -120,6 +156,6 @@ android {
     buildFeatures{
         compose = true
     }
-    task("testClasses")
+    //task("testClasses")
 }
 

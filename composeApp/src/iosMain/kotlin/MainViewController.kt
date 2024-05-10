@@ -4,7 +4,7 @@ import data.repository.DatabaseDriverFactory
 import di.appModule
 import org.koin.core.context.startKoin
 
-fun MainViewController() = ComposeUIViewController { App() }
+fun MainViewController() = ComposeUIViewController { App(CrossConfigDevice()) }
 
 fun initKoin(){
     startKoin {

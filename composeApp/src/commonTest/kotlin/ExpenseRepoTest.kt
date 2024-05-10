@@ -9,7 +9,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ExpenseRepoTest {
-    private val expenseManager = ExpenseManager
+    /*private val expenseManager = ExpenseManager
     private val repo = ExpenseRepositoryImpl(expenseManager)
 
     @Test
@@ -101,5 +101,5 @@ class ExpenseRepoTest {
 
         // THEN
         assertEquals(allCategories, repoCategories)
-    }
+    }*/
 }

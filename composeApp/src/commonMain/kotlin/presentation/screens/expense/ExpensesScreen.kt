@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -26,34 +29,95 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import domain.model.Expense
 import presentation.ui.theme.getColorsTheme
+import utils.EXPENSE_SCREEN_EMPTY_LIST_TEST_TAG
+import utils.EXPENSE_SCREEN_ERROR_TEST_TAG
+import utils.EXPENSE_SCREEN_ERROR_TEXT_TEST_TAG
+import utils.EXPENSE_SCREEN_LOADING_TEST_TAG
+import utils.EXPENSE_SCREEN_SUCCESS_CLICK_ITEM_TEST_TAG
+import utils.EXPENSE_SCREEN_SUCCESS_TEST_TAG
+import utils.EXPENSE_SCREEN_TOTAL_TEST_TAG
+import utils.SwipeComponent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ExpensesScreen(uiState: ExpensesUiState, onExpenseClick: (expense: Expense) -> Unit) {
+fun ExpensesScreen(
+    uiState: ExpensesUiState,
+    onExpenseClick: (expense: Expense) -> Unit,
+    onDeleteExpense: (expense: Expense) -> Unit,
+) {
     val colors = getColorsTheme()
 
-    LazyColumn(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        stickyHeader {
-            Column(
-                modifier = Modifier.background(colors.backgroundColor)
+    when (uiState) {
+        ExpensesUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize().testTag(EXPENSE_SCREEN_LOADING_TEST_TAG),
+                contentAlignment = Alignment.Center
             ) {
-                ExpensesTotalHeader(uiState.total)
-                AllExpensesHeader()
+                CircularProgressIndicator()
             }
         }
 
-        items(uiState.expenses) {
-            ExpensesItem(expense = it, onExpenseClick = onExpenseClick)
+        is ExpensesUiState.Success -> {
+            if(uiState.expenses.isEmpty()){
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp).testTag(EXPENSE_SCREEN_EMPTY_LIST_TEST_TAG),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "No expenses found, please add your first expense with the + symbol down below",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.body1
+                    )
+                }
+            }else {
+                LazyColumn(
+                    modifier = Modifier.padding(16.dp).testTag(EXPENSE_SCREEN_SUCCESS_TEST_TAG),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    stickyHeader {
+                        Column(
+                            modifier = Modifier.background(colors.backgroundColor)
+                        ) {
+                            ExpensesTotalHeader(uiState.total)
+                            AllExpensesHeader()
+                        }
+                    }
+
+                    items(items = uiState.expenses, key = { it.id }) { expense ->
+                        SwipeComponent(
+                            item = expense,
+                            onDelete = onDeleteExpense
+                        ) {
+                            ExpensesItem(expense = expense, onExpenseClick = onExpenseClick)
+                        }
+                    }
+                }
+            }
+        }
+
+        is ExpensesUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize().testTag(EXPENSE_SCREEN_ERROR_TEST_TAG),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    modifier = Modifier.testTag(EXPENSE_SCREEN_ERROR_TEXT_TEST_TAG),
+                    text = "Error: ${uiState.message}",
+                    style = MaterialTheme.typography.body1
+                )
+            }
         }
     }
+
+
 }
 
 @Composable
@@ -68,6 +132,7 @@ fun ExpensesTotalHeader(total: Double) {
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
+                modifier = Modifier.testTag(EXPENSE_SCREEN_TOTAL_TEST_TAG),
                 text = "$total",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraBold,
@@ -122,7 +187,7 @@ fun ExpensesItem(expense: Expense, onExpenseClick: (expense: Expense) -> Unit) {
             .padding(horizontal = 2.dp)
             .clickable {
                 onExpenseClick(expense)
-            },
+            }.testTag("${EXPENSE_SCREEN_SUCCESS_CLICK_ITEM_TEST_TAG}_${expense.id}"),
         backgroundColor = colors.backgroundColor,
         shape = RoundedCornerShape(30)
     ) {
